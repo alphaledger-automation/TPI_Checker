@@ -1,0 +1,134 @@
+=============================================================
+  TAXPAYER PROFILE INQUIRY  v1.0  —  FBR Online Verification
+=============================================================
+
+WHAT IT DOES
+------------
+  Reads NTN / CNIC / Passport / Reg-Inc numbers from an Excel file, looks
+  each one up on FBR IRIS (Online Verifications -> Taxpayer Profile
+  Inquiry), saves the profile card as a PDF and writes an Excel summary
+  with Name, Category, Tax Office, Registration Status, Sales Tax
+  registration, address, contact and every business / branch line.
+
+  The browser works in the background. You never see it and it does not
+  use your mouse or keyboard, so you can keep working.
+
+
+HOW TO RUN
+----------
+  Double-click   run.bat
+
+  First run only: the app checks what is missing and installs it by
+  itself (needs internet):
+    - Python packages (customtkinter, playwright, openpyxl, ...)
+    - Chromium browser (about 150 MB)
+    - Tesseract-OCR  (Windows may ask "Allow this app?" - click Yes)
+  If Python itself is missing, run.bat installs it too.
+  After that the app opens straight away.
+
+
+HOW TO USE
+----------
+  Dashboard page (left sidebar)
+    1. Browse ...           pick your Excel file (.xlsx)
+    2. Registration Column  auto-detected (Registration Number /
+                            Registration No / NTN / CNIC ...).
+                            Pick it yourself if not detected.
+    3. Parameter Type       Auto (default), or force NTN / CNIC /
+                            Passport No. / Reg/Inc. No. for the whole file
+    4. Save PDFs To         default: Profile_PDFs folder next to the Excel
+    5. Start
+
+  Current Status page (left sidebar)
+    Done / Total counter and a live list of every number with its Name,
+    Tax Office, Registration Status and Result.
+
+  Pause / Resume and Cancel work after the current number finishes.
+
+
+EXCEL FILE
+----------
+  - First row must be the headers.
+  - Auto parameter type:
+      7 characters   = NTN  (e.g. 1234567, 0123456, E123456)
+      13 digits      = CNIC (dashes are ignored)
+      9+ digits      = Reg/Inc. No. (e.g. 123456789012)
+      letters+digits = Passport No.
+    If a file holds one kind of number only, set Parameter Type yourself
+    instead of leaving it on Auto.
+  - Duplicate numbers are checked only once.
+  - Your Excel file is never changed. Results go to the summary file.
+
+
+OUTPUT
+------
+  <PDF folder>\<RegNo>_<DD-MM-YYYY>.pdf             one per number
+  <PDF folder>\Profile_Summary_<DD-MM-YYYY>.xlsx      summary file
+
+  Summary sheet "Profiles":
+    Length | Registration Number | file name | Status | Name |
+    Reference No | Registered for Sales Tax | Category | PP/REG/INC No. |
+    Email | Cell | Address | Registered On | Tax Office |
+    Registration Status | Income Tax Status | Sales Tax Status |
+    Branches | PDF Status
+
+  Summary sheet "Branches":
+    Registration Number | Name | Sr | Business/Branch Name |
+    Business/Branch Address | Principal Activity
+
+  It is created when the run starts and updated after every number.
+  Status = Downloaded / Not-Downloaded / Error - <reason>.
+  (Keep it closed in Excel during a run so it can be updated.)
+
+  Run it again on the same day into the same folder to continue: numbers
+  that already have a PDF are skipped ("Already downloaded").
+  Tick "Re-download existing PDFs" to fetch them again. The date in the
+  file name is the day the profile was downloaded — a run on another day
+  downloads fresh copies.
+
+
+OPTIONS
+-------
+  Light / Dark               switch at the bottom of the left sidebar;
+                             your choice is remembered
+  Show browser window        shows the Chromium window (for checking
+                             what is happening if something fails)
+  Re-download existing PDFs  ignore PDFs already in the folder
+
+
+TROUBLESHOOTING
+---------------
+  "Failed - captcha not accepted"
+      The captcha could not be read after 5 tries. Just press Start
+      again - only the failed / pending numbers are retried.
+
+  "Could not select Parameter Type ..."
+      The number was classified as a type this form does not accept.
+      Set Parameter Type on the Dashboard and start again.
+
+  "FBR IRIS blocked this connection"
+      IRIS refused the connection. Try again later or from another
+      internet connection.
+
+  Setup problems
+      See  %LocalAppData%\TPI_Checker\setup.log
+      Tesseract manual install:
+      https://github.com/UB-Mannheim/tesseract/wiki
+
+
+FILES
+-----
+  run.bat            start here
+  main.py            entry point (checks/installs dependencies)
+  bootstrap.py       dependency check + installer
+  gui.py             Dashboard / Current Status window
+  browser_engine.py  IRIS automation
+  excel_handler.py   reads the Excel file
+  report_writer.py   writes the Excel report
+  constants.py       settings (URL, selectors, timings)
+  requirements.txt   Python packages
+  Assets\            icons
+
+=============================================================
+  Alpha Ledger Automation
+=============================================================
